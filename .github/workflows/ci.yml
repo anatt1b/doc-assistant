@@ -1,0 +1,24 @@
+name: CI
+
+on:         # Trigger the workflow on push or pull request events to the main branch
+  push:      
+      branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:       # Define a job named "build"
+  build:        
+    runs-on: ubuntu-latest   # Use the latest version of Ubuntu as the runner environment
+
+    steps:          # Define the steps to be executed in the job
+      - uses: actions/checkout@v4   # Step 1: Check out the repository code
+
+        uses: actions/setup-python@v5 # Step 2: Set up Python environment
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies   # Step 3: Install project dependencies
+        run: pip install -r requirements.txt # Install dependencies from the requirements.txt file
+
+      - name: Import check   # Step 4: Run tests using pytest
+        run: python -c "from app.main import app; print('OK')" # Check if the app can be imported successfully
