@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File # # FastAPI + tiedoston vastaanotto
+from fastapi import FastAPI, UploadFile, File, HTTPException # FastAPI + tiedoston vastaanotto
 from pathlib import Path # Tuodaan Path-luokka tiedostopolkujen käsittelyyn
 import uuid # Tuodaan uuid-kirjasto uniikkien tunnisteiden luomiseen
 
@@ -20,3 +20,18 @@ async def upload_file(file: UploadFile = File(...)): # Määritellään funktio,
     save_path.write_bytes(content) # Tallennetaan tiedosto levylle
     return {"file_id": file_id, "filename": file.filename} # Palautetaan JSON-objekti, joka sisältää tiedoston tunnisteen ja nimen
 
+@app.post("/ask") # Määritellään reitti /ask, joka vastaa HTTP POST -pyyntöihin
+async def ask(file_id: str, question: str): # Määritellään funktio, joka ottaa vastaan tiedoston tunnisteen ja kysymyksen
+    file_path = UPLOAD_DIR / f"{file_id}_{file_id}" # Määritellään polku, josta tiedosto haetaan
+    if not file_path.exists(): # Tarkistetaan, että tiedosto löytyy
+        raise HTTPException(status_code=404, detail="File not found") # Jos tiedostoa ei löydy, palautetaan 404-virhe   
+    
+    text = file_path.read_text(errors="ignore") # Luetaan tiedoston sisältö tekstinä, ohittaen mahdolliset virheet
+
+    # TODO: TÄHÄN KOHTAAN VAIHDETAAN OPENAI-LOGIIKKA
+    # Nyt oalautetaan vain osa tiedostosta testimielessä
+    # Myöhemmin tässä kohdassa:
+    # 1) Lähetetään 'text' +'question' OpenAI:lle
+    # 2) Saadaan OpenAI:lta vastaus, joka palautetaan käyttäjälle
+    
+    return {"question": question, "preview": text[:500]}  # MVP-vastaus
