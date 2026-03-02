@@ -5,7 +5,8 @@ import uuid # Tuodaan uuid-kirjasto uniikkien tunnisteiden luomiseen
 
 app = FastAPI() # Luodaan FastAPI-sovellus
 
-UPLOAD_DIR = Path("uploads") # Määritellään polku, johon ladatut tiedostot tallennetaan
+BASE_DIR = Path(__file__).resolve().parent.parent # Määritellään peruspolku, joka on tämän tiedoston sijainti
+UPLOAD_DIR = BASE_DIR / "uploads" # Määritellään polku, johon ladatut tiedostot tallennetaan
 UPLOAD_DIR.mkdir(exist_ok=True) # Luodaan kansio, jos se ei vielä ole olemassa
 
 @app.get("/health") # Määritellään reitti /health, joka vastaa HTTP GET -pyyntöihin
@@ -22,10 +23,10 @@ async def upload_file(file: UploadFile = File(...)): # Määritellään funktio,
 
 @app.post("/ask") # Määritellään reitti /ask, joka vastaa HTTP POST -pyyntöihin
 async def ask(file_id: str, question: str): # Määritellään funktio, joka ottaa vastaan tiedoston tunnisteen ja kysymyksen
-    file_path = UPLOAD_DIR / f"{file_id}_{file_id}" # Määritellään polku, josta tiedosto haetaan
-    if not file_path.exists(): # Tarkistetaan, että tiedosto löytyy
+    matches = list(UPLOAD_DIR.glob(f"{file_id}_*"))# Määritellään polku, josta tiedosto haetaan
+    if not matches: # Tarkistetaan, että tiedosto löytyy
         raise HTTPException(status_code=404, detail="File not found") # Jos tiedostoa ei löydy, palautetaan 404-virhe   
-    
+    file_path = matches[0] # Oletetaan, että tiedosto löytyy ja otetaan ensimmäinen osuma   
     text = file_path.read_text(errors="ignore") # Luetaan tiedoston sisältö tekstinä, ohittaen mahdolliset virheet
 
     # TODO: TÄHÄN KOHTAAN VAIHDETAAN OPENAI-LOGIIKKA
