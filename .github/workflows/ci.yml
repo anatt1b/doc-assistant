@@ -23,4 +23,6 @@ jobs:  # Työt
         run: pip install -r requirements.txt  # Asentaa requirements.txt
 
       - name: Import check  # Tarkista että appi käynnistyy/importtaa
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}  # Aseta API-avain ympäristömuuttujaan (GitHub Secrets)
         run: python -c "from app.main import app; print('OK')"  # Pieni testi
